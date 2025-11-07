@@ -6,11 +6,10 @@ import { useEffect, useMemo, useState } from "react"
 import useIsLoaded from "@/hooks/use-is-loaded"
 import { dialogData } from "@/lib/mock"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import dynamic from "next/dynamic"
-const AtProperties = dynamic(
-	() => import("../components/custom/at-properties"),
-	{ ssr: false }
-)
+import AtProperties from "@/components/custom/at-properties"
+
+const DELAY = 50
+
 export default function Home() {
 	const [activeIndex, setActiveIndex] = useState<number[]>([])
 	const [prevActiveIndex, setPrevActiveIndex] = useState<number[]>([])
@@ -28,7 +27,7 @@ export default function Home() {
 					width: element.offsetWidth,
 				})
 			}
-		}, 100)
+		}, 10)
 	}, [activeIndex, drawerOpen, loaded])
 	console.log({ dims })
 	useEffect(() => {
@@ -37,14 +36,14 @@ export default function Home() {
 				setActiveIndex([])
 				setPrevActiveIndex([])
 				setDims({})
-			}, 100)
+			}, DELAY)
 		}
 	}, [drawerOpen])
 	console.log(activeNode)
 
 	function updateActiveIndex(newIndex: number[]) {
 		setPrevActiveIndex(activeIndex)
-		setTimeout(() => setActiveIndex(newIndex), 100)
+		setTimeout(() => setActiveIndex(newIndex), DELAY)
 	}
 
 	const currentList = useMemo(() => {
@@ -80,6 +79,12 @@ export default function Home() {
 		}
 		return prevActiveIndex.length < activeIndex.length
 	}
+	function hasBack(index: number) {
+		if (index === 0) {
+			return activeIndex.length > 0
+		}
+		return prevActiveIndex.length > 0
+	}
 
 	return (
 		<main className="h-dvh grid place-items-center">
@@ -89,7 +94,7 @@ export default function Home() {
 					Open Menu
 				</DrawerTrigger>
 				<DrawerContent
-					className="transition-[height]! duration-200 mx-auto w-[min(512px,100%-2rem)] ~mb-12! bottom-12! ~after:bg-transparent! rounded-2xl! items-center overflow-hidden ~after:hidden!"
+					className="transition-[height]! duration-(--animation-duration) mx-auto w-[min(512px,100%-2rem)] ~mb-12! bottom-12! ~after:bg-transparent! rounded-2xl! items-center overflow-hidden ~after:hidden!"
 					style={{
 						height: dims.height ? dims.height : "auto",
 					}}
@@ -102,15 +107,15 @@ export default function Home() {
 								{
 									"z-10 ~opacity-100 ~block ~visible ~translate-x-0 ~starting-hidden":
 										isCurrent(index),
-									"starting-x-full animate-[nextToCurrent_300ms_forwards]":
+									"starting-x-full animate-[nextToCurrent_var(--animation-duration)_forwards]":
 										isCurrent(index) && isNext(index),
-									"-starting-x-full animate-[previousToCurrent_300ms_forwards]":
+									"-starting-x-full animate-[previousToCurrent_var(--animation-duration)_forwards]":
 										isCurrent(index) && isPrevious(index),
 									"~opacity-0 ~hidden ~invisible":
 										isPast(index),
-									"translate-x-full animate-[currentToNext_300ms_forwards]":
+									"translate-x-full animate-[currentToNext_var(--animation-duration)_forwards]":
 										isPast(index) && isNext(index),
-									"-translate-x-full animate-[currentToPrevious_300ms_forwards]":
+									"-translate-x-full animate-[currentToPrevious_var(--animation-duration)_forwards]":
 										isPast(index) && isPrevious(index),
 								},
 								prevActiveIndex
@@ -122,12 +127,12 @@ export default function Home() {
 							}
 							id={index + "-node"}
 						>
-							{activeIndex.length > 0 && (
+							{hasBack(index) && (
 								<Button
 									variant="ghost"
 									onClick={() =>
 										updateActiveIndex(
-											activeIndex.slice(0, -1)
+											[...activeIndex].slice(0, -1)
 										)
 									}
 									className="px-4 hover:bg-transparent"
