@@ -37,7 +37,7 @@ export default function Home() {
 				setActiveIndex([])
 				setPrevActiveIndex([])
 				setDims({})
-			}, 1000)
+			}, 100)
 		}
 	}, [drawerOpen])
 	console.log(activeNode)
@@ -82,84 +82,91 @@ export default function Home() {
 	}
 
 	return (
-		<Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-			<AtProperties />
-			<DrawerTrigger>Open</DrawerTrigger>
-			<DrawerContent
-				className="transition-[height]! duration-1000 mx-auto w-[min(512px,100%-2rem)] ~mb-12! bottom-12! ~after:bg-transparent! rounded-2xl! items-center overflow-hidden ~after:hidden!"
-				style={{
-					height: dims.height ? dims.height : "auto",
-				}}
-			>
-				{currentList.map((item, index) => (
-					<div
-						key={index}
-						className={cn(
-							"absolute inset-x-0 content-center transition-discrete py-4 |",
-							{
-								"z-10 ~opacity-100 ~block ~visible ~translate-x-0 ~starting-hidden":
-									isCurrent(index),
-								"starting-x-full animate-[nextToCurrent_1s_forwards]":
-									isCurrent(index) && isNext(index),
-								"-starting-x-full animate-[previousToCurrent_1s_forwards]":
-									isCurrent(index) && isPrevious(index),
-								"~opacity-0 ~hidden ~invisible": isPast(index),
-								"translate-x-full animate-[currentToNext_1s_forwards]":
-									isPast(index) && isNext(index),
-								"-translate-x-full animate-[currentToPrevious_1s_forwards]":
-									isPast(index) && isPrevious(index),
-							},
-							prevActiveIndex
-						)}
-						ref={
-							isCurrent(index) && drawerOpen
-								? setActiveNode
-								: null
-						}
-						id={index + "-node"}
-					>
-						{activeIndex.length > 0 && (
-							<Button
-								variant="ghost"
-								onClick={() =>
-									updateActiveIndex(activeIndex.slice(0, -1))
-								}
-								className="px-4 hover:bg-transparent"
-							>
-								<ChevronLeft /> Back
-							</Button>
-						)}
-						<div className="flex flex-col w-full">
-							{item.children?.map((child, childIndex) => (
+		<main className="h-dvh grid place-items-center">
+			<Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+				<AtProperties />
+				<DrawerTrigger className="bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:cursor-pointer">
+					Open Menu
+				</DrawerTrigger>
+				<DrawerContent
+					className="transition-[height]! duration-200 mx-auto w-[min(512px,100%-2rem)] ~mb-12! bottom-12! ~after:bg-transparent! rounded-2xl! items-center overflow-hidden ~after:hidden!"
+					style={{
+						height: dims.height ? dims.height : "auto",
+					}}
+				>
+					{currentList.map((item, index) => (
+						<div
+							key={index}
+							className={cn(
+								"absolute inset-x-0 content-center transition-discrete py-4 |",
+								{
+									"z-10 ~opacity-100 ~block ~visible ~translate-x-0 ~starting-hidden":
+										isCurrent(index),
+									"starting-x-full animate-[nextToCurrent_300ms_forwards]":
+										isCurrent(index) && isNext(index),
+									"-starting-x-full animate-[previousToCurrent_300ms_forwards]":
+										isCurrent(index) && isPrevious(index),
+									"~opacity-0 ~hidden ~invisible":
+										isPast(index),
+									"translate-x-full animate-[currentToNext_300ms_forwards]":
+										isPast(index) && isNext(index),
+									"-translate-x-full animate-[currentToPrevious_300ms_forwards]":
+										isPast(index) && isPrevious(index),
+								},
+								prevActiveIndex
+							)}
+							ref={
+								isCurrent(index) && drawerOpen
+									? setActiveNode
+									: null
+							}
+							id={index + "-node"}
+						>
+							{activeIndex.length > 0 && (
 								<Button
 									variant="ghost"
-									key={childIndex}
-									onClick={() => {
-										if (!child.children) {
-											setDrawerOpen(false)
-											return
-										}
-										updateActiveIndex([
-											...activeIndex,
-											childIndex,
-										])
-									}}
-									className="text-xs block text-start w-full h-auto p-0 px-4 py-2 hover:bg-transparent"
+									onClick={() =>
+										updateActiveIndex(
+											activeIndex.slice(0, -1)
+										)
+									}
+									className="px-4 hover:bg-transparent"
 								>
-									<span className="grid gap-2 grid-cols-[auto_1fr_auto] items-start font-medium">
-										{child.icon}
-										{child.title}
-										{child.children && <ChevronRight />}
-									</span>
-									<span className="px-6 mt-1 wrap-break-word whitespace-normal inline-block opacity-70 text-[0.75rem] font-normal">
-										{child.description}
-									</span>
+									<ChevronLeft /> Back
 								</Button>
-							))}
+							)}
+							<div className="flex flex-col w-full">
+								{item.children?.map((child, childIndex) => (
+									<Button
+										variant="ghost"
+										key={childIndex}
+										onClick={() => {
+											if (!child.children) {
+												setDrawerOpen(false)
+												return
+											}
+											updateActiveIndex([
+												...activeIndex,
+												childIndex,
+											])
+										}}
+										className="text-xs block text-start w-full h-auto p-0 px-4 py-2 hover:bg-transparent"
+									>
+										<span className="grid gap-2 grid-cols-[auto_1fr_auto] items-start font-medium">
+											{child.icon}
+											{child.title}
+											{child.children && <ChevronRight />}
+										</span>
+										<span className="px-6 mt-1 wrap-break-word whitespace-normal inline-block opacity-70 text-[0.75rem] font-normal">
+											{child.description}
+										</span>
+									</Button>
+								))}
+							</div>
 						</div>
-					</div>
-				))}
-			</DrawerContent>
-		</Drawer>
+					))}
+				</DrawerContent>
+			</Drawer>
+		</main>
 	)
 }
